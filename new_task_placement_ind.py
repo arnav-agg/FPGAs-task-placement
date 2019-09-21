@@ -12,6 +12,9 @@ import math
 # total number of tasks
 num_tasks = 65;
 
+# SA 
+#rejects = 0;
+
 # svr model parameters
 #svr_params = [('linear', 15, 0.2), \
 #              ('linear', 27, 0.6), \
@@ -48,32 +51,39 @@ def simulated_annealing(workload, model, X):
     # initial placement
     placement = workload
     # initial temperature
-    T = 100
+    T = 1000
     # temperature reduction rate
-    r = 0.9
+    r = 0.85
     # number of trails at each temperature
     M = 10
     steps = 0
     time_taken = 0
     # time in seconds since the epoch
     stime = time.time()
-
-    while time_taken < 10 and steps < M*15:
-        placement = perturb(T, M, placement, model, X)
+    while time_taken < 3 and steps < 10:
+        placement, rejects = perturb(T, M, placement, model, X)
+        #print "rejects: ", rejects
+        if rejects >= 0.9 * M:
+            break
+        steps += 1;
+        #print "temp", T
+        #T = pow(r, steps) * T
         T = r * T
-        steps += M;
         time_taken = time.time() - stime
     print placement
     return placement
 
 
 def perturb(T, M, placement, model, X):
-    p = placement
-    best_p = placement
+    p = placement[:]
+    best_p = placement[:]
     #print "best start", len(best_p), best_p, placement
     cost = get_cost(p, model, X)
     min_cost = cost
-    while M > 0:
+    uphills = 0
+    rejects = 0
+    Mt = 0
+    while Mt < M and uphills < M/2:
         move = random.randint(0, 2)
         if move == 0:
             neighbor_p = swap(p)
@@ -83,19 +93,25 @@ def perturb(T, M, placement, model, X):
             neighbor_p = translate(p)
         if neighbor_p == None:
             continue
-
+        #print move, p, neighbor_p
         new_cost = get_cost(neighbor_p, model, X)
         delta = new_cost - cost
         probability = random.uniform(0, 1)
-        if delta < 0 or probability < math.exp(-delta/T):
-            p = neighbor_p
+        if delta <= 0 or probability < math.exp(-delta/T):
+            p = neighbor_p[:]
             cost = new_cost
+            if delta > 0:
+                uphills += 1
             if new_cost < min_cost:
-                best_p = neighbor_p
+                best_p = neighbor_p[:]
                 min_cost = new_cost
-        M -= 1
-    #print "best", len(best_p), best_p, p, neighbor_p, placement
-    return best_p
+                #print min_cost
+        else:
+            rejects += 1
+        #print "rejects: ", rejects
+        Mt += 1
+    #print "best", len(best_p), best_p, min_cost, placement
+    return best_p, rejects
 
 def get_cost(placement, model, X):
     N = len(placement)
