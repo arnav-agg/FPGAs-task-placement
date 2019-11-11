@@ -16,33 +16,14 @@ num_tasks = 86;
 # rejects = 0;
 
 # svr model parameters
-'''
 svr_params = [('linear', 27, 0.5),
               ('linear', 27, 0.5),
               ('linear', 27, 0.5),
               ('linear', 27, 0.5)]
-'''
 # svr_params = [('linear', 15, 0.2), \
 #              ('linear', 27, 0.6), \
 #              ('linear', 17, 0.001), \
 #              ('linear', 18, 0.3)]
-# svr_params = [('linear', 15, 0.2), \
-#               ('linear', 27, 0.6), \
-#               ('linear', 17, 0.001), \
-#               ('linear', 18, 0.3), \
-#               ('linear', 15, 0.2), \
-#               ('linear', 27, 0.6), \
-#               ('linear', 17, 0.001), \
-#               ('linear', 18, 0.3)]
-
-svr_params = [('linear', 27, 0.5), \
-              ('linear', 27, 0.5), \
-              ('linear', 27, 0.5), \
-              ('linear', 27, 0.5), \
-              ('linear', 27, 0.5), \
-              ('linear', 27, 0.5), \
-              ('linear', 27, 0.5), \
-              ('linear', 27, 0.5)]
 
 def brute_force(workload, model, X):
     N = len(workload)
@@ -117,12 +98,12 @@ def simulated_annealing(workload, model, X):
     # temperature reduction rate
     r = 0.85
     # number of trails at each temperature
-    M = 10
+    M = 4
     steps = 0
     time_taken = 0
     # time in seconds since the epoch
     stime = time.time()
-    while time_taken < 1 and steps < 10:
+    while time_taken < 1 and steps < 4:
         placement, rejects = perturb(T, M, placement, model, X)
         # print "rejects: ", rejects
         if rejects >= 0.9 * M:
@@ -146,7 +127,7 @@ def perturb(T, M, placement, model, X):
     rejects = 0
     Mt = 0
     while Mt < M and uphills < M / 2:
-        move = random.randint(0, 2)
+        move = random.randint(0, 1)
         #move = random.randint(0, 1)
         if move == 0:
             neighbor_p = swap(p)
@@ -251,13 +232,13 @@ def translate(workload):
 if __name__ == '__main__':
     # set this argument to 1 to use the brute_force method
     # use_brute_force = 0
-    random.seed(2)
+    random.seed(0)
     use_brute_force = int(sys.argv[1])
     num_samples = int(sys.argv[2])
     #use_brute_force = 0
     #num_samples = 6
     # number of tasks to place
-    N = 8
+    N = 4
     # initialize ML models
     model = []
     for i in range(N):
@@ -266,8 +247,7 @@ if __name__ == '__main__':
         # model.append(LR())
 
     # Data parsing
-    #data = '86data.csv'
-    data = '86data_8node.csv'
+    data = '86data.csv'
     data = np.array(np.genfromtxt(data, delimiter=','))
     print data.shape
     NumVars = np.shape(data)[1] - 2*N

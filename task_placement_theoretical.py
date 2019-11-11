@@ -7,7 +7,7 @@ if __name__ == '__main__':
     N = 8
     num_samples = int(sys.argv[1])
     # Data parsing
-    data = 'data.csv'
+    data = '86data_8node.csv'
     data = np.array(np.genfromtxt(data, delimiter=','))
     NumVars = np.shape(data)[1] - N
 
@@ -17,7 +17,7 @@ if __name__ == '__main__':
         y_full.append(np.reshape(data[: , NumVars + i : NumVars + i + 1], np.size(data[:, 0]), 1))
 
     # Creating a set of 100 random combinations of the possible task combinations...
-    indices = range(65)
+    indices = range(86)
     #possSets = list(itertools.combinations(indices, N))
     # print(np.shape(possSets))
     random.seed(1)
