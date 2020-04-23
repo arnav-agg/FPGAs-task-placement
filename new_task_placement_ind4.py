@@ -25,6 +25,22 @@ svr_params = [('linear', 27, 0.5),
 #              ('linear', 17, 0.001), \
 #              ('linear', 18, 0.3)]
 
+
+def based_on_sorting(node_temp_order, workload, model, X):
+    N = len(workload)
+    temp_array = []
+    best_p = [0, 0, 0, 0]
+    for i in range(N):
+        temp_array.append(model[0].predict([X[workload[i]]]))
+    arr = []
+    for i in range(N):
+        arr.append((temp_array[i], workload[i]))
+    sorted_arr = sorted(arr, key=lambda x: x[0])
+#    print(sorted_arr)    
+    for i in range(N):
+        best_p[node_temp_order[i]] = sorted_arr[i][1]
+    return best_p
+
 def brute_force(workload, model, X):
     N = len(workload)
     placements = list(itertools.permutations(workload))
@@ -230,6 +246,8 @@ def translate(workload):
 
 
 if __name__ == '__main__':
+    node_temp_order = {1: 0, 0: 1, 3: 2, 2: 3} 
+    #node_temp_order = [1, 0, 3, 2]
     # set this argument to 1 to use the brute_force method
     # use_brute_force = 0
     random.seed(0)
@@ -304,8 +322,10 @@ if __name__ == '__main__':
         if use_brute_force == 1:
             # print("using brute force")
             placement = brute_force(w_c, model, X_t)
-        else:
+        elif use_brute_force == 2:
             placement = simulated_annealing(w_c, model, X_t)
+	else:
+            placement = based_on_sorting(node_temp_order, w_c, model, X_t)
 
         ftime = time.time()
 
